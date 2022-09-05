@@ -1,15 +1,13 @@
 import pygame
 from sys import exit
+import level
 
 class Game:
   def __init__(self):
 
     pygame.init()
-    self.screen = pygame.display.set_mode((800, 450))
+    self.screen = pygame.display.set_mode((level.WIDTH, level.HEIGHT))
     self.clock = pygame.time.Clock()
-
-    self.box = pygame.Rect(100, 100, 20, 20)
-    self.movementSpeed = 4
 
   def run(self):
     while True:
@@ -21,20 +19,28 @@ class Game:
       keys = pygame.key.get_pressed()
 
       if keys[pygame.K_w]:
-        self.box.move_ip(0, -self.movementSpeed)
+        player.box.move_ip(0, -player.movementSpeed)
       if keys[pygame.K_a]:
-        self.box.move_ip(-self.movementSpeed, 0)
+        player.box.move_ip(-player.movementSpeed, 0)
       if keys[pygame.K_s]:
-        self.box.move_ip(0, self.movementSpeed)
+        player.box.move_ip(0, player.movementSpeed)
       if keys[pygame.K_d]:
-        self.box.move_ip(self.movementSpeed, 0)
+        player.box.move_ip(player.movementSpeed, 0)
 
       self.screen.fill("black")
-      pygame.draw.rect(self.screen, "yellow", self.box)
+      pygame.draw.rect(self.screen, "yellow", player.box)
 
       pygame.display.update()
       self.clock.tick(60)
 
+class Player:
+  def __init__(self):
+    
+    self.box = pygame.Rect(100, 100, 20, 20)
+    self.movementSpeed = 4
+
 if __name__ == "__main__":
   game = Game()
+  player = Player()
+
   game.run()

@@ -21,7 +21,7 @@ level_layout = [
 "",
 "",
 "",
-"",
 "oooooooooooooooooooooooooooooooo",
+"",
 ]
 
