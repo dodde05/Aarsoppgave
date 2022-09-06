@@ -21,4 +21,3 @@ map_layout = [
 "oooooooooooooooooooooooooooooooo",
 "",
 ]
-
