@@ -19,8 +19,10 @@ class Game:
           pygame.quit()
           exit()
 
-      player.movement()
-      player.gravity()
+        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: # Spør om hjelp
+          player.movement(True)
+        else:
+          player.movement(False)
 
       self.screen.fill("black")
 
@@ -34,33 +36,48 @@ class Player:
   def __init__(self):
     self.box = pygame.Rect(100, 100, 20, 20)
 
-    self.movementSpeed = 4
+    self.xspeed = 0
     self.yspeed = 0
 
-  def movement(self):
+    self.grounded = False
+
+  def movement(self, jump):
+    # User inputs
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_a]:
-      self.box.move_ip(-self.movementSpeed, 0)
+      self.xspeed -= .5
     if keys[pygame.K_d]:
-      self.box.move_ip(self.movementSpeed, 0)
+      self.xspeed += .5
 
-  def gravity(self):
-    if self.collision():
-      self.yspeed = 0
-      return
+    if not keys[pygame.K_a] and not keys[pygame.K_d]:
+      self.xspeed -= self.xspeed / 10
+    
+    if self.xspeed > 4:
+      self.xspeed = 4
+    elif self.xspeed < -4:
+      self.xspeed = -4
+
+    # Gravity
+    self.collision()
+    if self.grounded:
+      if jump == True:
+        self.yspeed = -10
+      else:
+        self.yspeed = 0
     else:
       self.yspeed += .3
-      self.box.move_ip(0, self.yspeed)
+
+    self.box.move_ip(self.xspeed, self.yspeed)
   
   def collision(self):
     colliding_i = self.box.collidelist(terrain.rects)
 
     if colliding_i == -1:
-      return False
-    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 10:
-      self.box.bottom = terrain.rects[colliding_i].top
-      return True
+      self.grounded = False
+    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 12.5:
+      self.box.bottom = terrain.rects[colliding_i].top + 1
+      self.grounded = True
 
 class Terrain:
   def __init__(self):
