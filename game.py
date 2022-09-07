@@ -20,8 +20,7 @@ class Game:
           exit()
 
       player.movement()
-
-      player.colision()
+      player.gravity()
 
       self.screen.fill("black")
 
@@ -36,25 +35,32 @@ class Player:
     self.box = pygame.Rect(100, 100, 20, 20)
 
     self.movementSpeed = 4
+    self.yspeed = 0
 
   def movement(self):
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_w]:
-      self.box.move_ip(0, -self.movementSpeed)
     if keys[pygame.K_a]:
       self.box.move_ip(-self.movementSpeed, 0)
-    if keys[pygame.K_s]:
-      self.box.move_ip(0, self.movementSpeed)
     if keys[pygame.K_d]:
       self.box.move_ip(self.movementSpeed, 0)
-  
-  def colision(self):
-    colliding_i = self.box.collidelist(terrain.rects)
-    if colliding_i == -1:
+
+  def gravity(self):
+    if self.collision():
+      self.yspeed = 0
       return
-    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 8:
-      self.box.move_ip(0, -4)
+    else:
+      self.yspeed += .3
+      self.box.move_ip(0, self.yspeed)
+  
+  def collision(self):
+    colliding_i = self.box.collidelist(terrain.rects)
+
+    if colliding_i == -1:
+      return False
+    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 10:
+      self.box.bottom = terrain.rects[colliding_i].top
+      return True
 
 class Terrain:
   def __init__(self):
