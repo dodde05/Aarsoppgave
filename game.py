@@ -2,14 +2,13 @@ import pygame
 from sys import exit
 import map
 
+
 class Game:
   def __init__(self):
     
     pygame.init()
     self.screen = pygame.display.set_mode((800, 450))
     self.clock = pygame.time.Clock()
-
-    self.player = Player()
 
   def run(self):
     while True:
@@ -18,11 +17,8 @@ class Game:
         if event.type == pygame.QUIT:
           pygame.quit()
           exit()
-
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: # Spør om hjelp
-          player.movement(True)
-        else:
-          player.movement(False)
+      
+      player.movement()
 
       self.screen.fill("black")
 
@@ -32,52 +28,85 @@ class Game:
       pygame.display.update()
       self.clock.tick(60)
 
+
 class Player:
   def __init__(self):
     self.box = pygame.Rect(100, 100, 20, 20)
 
     self.xspeed = 0
+    self.xmax = 4
+
     self.yspeed = 0
+    self.ymax = 10
 
-    self.grounded = False
-
-  def movement(self, jump):
-    # User inputs
+  def movement(self):
     keys = pygame.key.get_pressed()
 
-    if keys[pygame.K_a]:
+    # Restart
+    if keys[pygame.K_r]:
+      self.__init__()
+    
+    # Horizontal movement
+    if keys[pygame.K_a] or keys[pygame.K_LEFT]:
       self.xspeed -= .5
-    if keys[pygame.K_d]:
+    if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
       self.xspeed += .5
 
     if not keys[pygame.K_a] and not keys[pygame.K_d]:
-      self.xspeed -= self.xspeed / 10
+      if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
+        self.xspeed -= self.xspeed / 10
     
-    if self.xspeed > 4:
-      self.xspeed = 4
-    elif self.xspeed < -4:
-      self.xspeed = -4
+    if self.xspeed > self.xmax:
+      self.xspeed = self.xmax
+    elif self.xspeed < -self.xmax:
+      self.xspeed = -self.xmax
 
-    # Gravity
-    self.collision()
-    if self.grounded:
-      if jump == True:
+    # Vertical movement
+    if self.collision():
+      if keys[pygame.K_SPACE]:
         self.yspeed = -10
-      else:
-        self.yspeed = 0
     else:
-      self.yspeed += .3
+      self.yspeed += .5
 
     self.box.move_ip(self.xspeed, self.yspeed)
-  
+
   def collision(self):
     colliding_i = self.box.collidelist(terrain.rects)
 
     if colliding_i == -1:
-      self.grounded = False
-    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 12.5:
+      currentx = self.box.x
+      currenty = self.box.y
+
+      xquarter = self.xspeed / 4
+      yquarter = self.yspeed / 4
+
+      for i in range(1, 3):
+        
+        self.box.move_ip(xquarter * i, yquarter * i)
+        colliding_i = self.box.collidelist(terrain.rects)
+        if colliding_i != -1:
+
+          if abs(self.box.bottom - terrain.rects[colliding_i].top) < 5:
+            self.yspeed = 0
+            self.box.bottom = terrain.rects[colliding_i].top + 1
+            return True
+          elif abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
+            self.yspeed = 0
+            self.box.top = terrain.rects[colliding_i].bottom
+          elif abs(self.box.right - terrain.rects[colliding_i].left) < 5:
+            self.xspeed = 0
+            self.box.right = terrain.rects[colliding_i].left
+          elif abs(self.box.left - terrain.rects[colliding_i].right) < 5:
+            self.xspeed = 0
+            self.box.left = terrain.rects[colliding_i].right
+          break
+
+      self.box.x, self.box.y = currentx, currenty
+
+    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 10:
       self.box.bottom = terrain.rects[colliding_i].top + 1
-      self.grounded = True
+      return True
+
 
 class Terrain:
   def __init__(self):
