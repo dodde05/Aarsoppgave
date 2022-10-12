@@ -54,7 +54,7 @@ class Player:
 
     if not keys[pygame.K_a] and not keys[pygame.K_d]:
       if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-        self.xspeed -= self.xspeed / 10
+        self.xspeed = 0
     
     if self.xspeed > self.xmax:
       self.xspeed = self.xmax
@@ -62,9 +62,13 @@ class Player:
       self.xspeed = -self.xmax
 
     # Vertical movement
-    if self.collision():
+    collision = self.collision() # The collision detection shall only be done once per frame
+    
+    if collision:
       if keys[pygame.K_SPACE]:
         self.yspeed = -10
+    elif collision == False:
+      pass
     else:
       self.yspeed += .5
 
@@ -80,32 +84,30 @@ class Player:
       xquarter = self.xspeed / 4
       yquarter = self.yspeed / 4
 
-      for i in range(1, 3):
-        
+      for i in range(1, 4):
+
         self.box.move_ip(xquarter * i, yquarter * i)
         colliding_i = self.box.collidelist(terrain.rects)
         if colliding_i != -1:
 
           if abs(self.box.bottom - terrain.rects[colliding_i].top) < 5:
             self.yspeed = 0
-            self.box.bottom = terrain.rects[colliding_i].top + 1
+            self.box.bottom = terrain.rects[colliding_i].top
             return True
           elif abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
             self.yspeed = 0
             self.box.top = terrain.rects[colliding_i].bottom
+            return False
           elif abs(self.box.right - terrain.rects[colliding_i].left) < 5:
             self.xspeed = 0
             self.box.right = terrain.rects[colliding_i].left
+            return False
           elif abs(self.box.left - terrain.rects[colliding_i].right) < 5:
             self.xspeed = 0
             self.box.left = terrain.rects[colliding_i].right
-          break
-
-      self.box.x, self.box.y = currentx, currenty
-
-    elif abs(self.box.bottom - terrain.rects[colliding_i].top) < 10:
-      self.box.bottom = terrain.rects[colliding_i].top + 1
-      return True
+            return False
+          else:
+            self.box.x, self.box.y = currentx, currenty
 
 
 class Terrain:
@@ -115,7 +117,7 @@ class Terrain:
     for row_i, row in enumerate(map.map_layout):
       for col_i, col in enumerate(row):
         if col == "o":
-          self.rects.append(pygame.Rect(col_i * map.TILESIZE, row_i * map.TILESIZE, map.TILESIZE, map.TILESIZE))
+          self.rects.append(pygame.Rect(col_i * map.TILESIZE - map.TILESIZE, row_i * map.TILESIZE - map.TILESIZE, map.TILESIZE, map.TILESIZE))
 
   def create_level(self):
     for i, rect in enumerate(self.rects):
