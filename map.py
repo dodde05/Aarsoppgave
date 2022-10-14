@@ -17,8 +17,8 @@ map_layout = [
 "o                                o",
 "o                                o",
 "o           oooooooooo           o",
-" oo                            oo ",
-"o                                o",
+"ooo                            ooo",
+"oooo                          oooo",
 " oooooooooooooooooooooooooooooooo ",
 "",
 "" #outside window

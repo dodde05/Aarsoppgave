@@ -66,7 +66,7 @@ class Player:
     
     if collision:
       if keys[pygame.K_SPACE]:
-        self.yspeed = -10
+        self.yspeed = -5
     elif collision == False:
       pass
     else:
@@ -92,22 +92,39 @@ class Player:
 
           if abs(self.box.bottom - terrain.rects[colliding_i].top) < 5:
             self.yspeed = 0
-            self.box.bottom = terrain.rects[colliding_i].top
+            self.box.bottom = terrain.rects[colliding_i].top + 1
             return True
-          elif abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
+          if abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
             self.yspeed = 0
             self.box.top = terrain.rects[colliding_i].bottom
             return False
-          elif abs(self.box.right - terrain.rects[colliding_i].left) < 5:
+          if abs(self.box.right - terrain.rects[colliding_i].left) < 5:
             self.xspeed = 0
             self.box.right = terrain.rects[colliding_i].left
             return False
-          elif abs(self.box.left - terrain.rects[colliding_i].right) < 5:
+          if abs(self.box.left - terrain.rects[colliding_i].right) < 5:
             self.xspeed = 0
             self.box.left = terrain.rects[colliding_i].right
             return False
-          else:
-            self.box.x, self.box.y = currentx, currenty
+          
+          self.box.x, self.box.y = currentx, currenty
+    else:
+      if abs(self.box.bottom - terrain.rects[colliding_i].top) < 5:
+        self.yspeed = 0
+        self.box.bottom = terrain.rects[colliding_i].top + 1
+        return True
+      if abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
+        self.yspeed = 0
+        self.box.top = terrain.rects[colliding_i].bottom
+        return False
+      if abs(self.box.right - terrain.rects[colliding_i].left) < 5:
+        self.xspeed = 0
+        self.box.right = terrain.rects[colliding_i].left
+        return False
+      if abs(self.box.left - terrain.rects[colliding_i].right) < 5:
+        self.xspeed = 0
+        self.box.left = terrain.rects[colliding_i].right
+        return False
 
 
 class Terrain:
