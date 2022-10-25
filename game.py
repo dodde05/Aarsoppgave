@@ -18,7 +18,7 @@ class Game:
           pygame.quit()
           exit()
       
-      player.movement()
+      player.input()
 
       self.screen.fill("black")
 
@@ -35,22 +35,25 @@ class Player:
 
     self.xspeed = 0
     self.xmax = 4
+    self.movementSpeed = .5
 
     self.yspeed = 0
     self.ymax = 10
+    self.gravity = .5
+    self.grounded = False
 
-  def movement(self):
+  def input(self):
     keys = pygame.key.get_pressed()
 
     # Restart
     if keys[pygame.K_r]:
       self.__init__()
     
-    # Horizontal movement
+    # Horizontal speed control
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-      self.xspeed -= .5
+      self.xspeed -= self.movementSpeed
     if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-      self.xspeed += .5
+      self.xspeed += self.movementSpeed
 
     if not keys[pygame.K_a] and not keys[pygame.K_d]:
       if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
@@ -61,70 +64,49 @@ class Player:
     elif self.xspeed < -self.xmax:
       self.xspeed = -self.xmax
 
-    # Vertical movement
-    collision = self.collision() # The collision detection shall only be done once per frame
+    #Jumping
+    if keys[pygame.K_SPACE]:
+      if self.grounded:
+        self.yspeed -= 10
     
-    if collision:
-      if keys[pygame.K_SPACE]:
-        self.yspeed = -5
-    elif collision == False:
-      pass
-    else:
-      self.yspeed += .5
+    self.movement()
 
-    self.box.move_ip(self.xspeed, self.yspeed)
-
-  def collision(self):
+  def hCollision(self):
     colliding_i = self.box.collidelist(terrain.rects)
 
-    if colliding_i == -1:
-      currentx = self.box.x
-      currenty = self.box.y
+    if colliding_i != -1:
+      rightDiff = abs(self.box.right - terrain.rects[colliding_i].left)
+      leftDiff = abs(self.box.left - terrain.rects[colliding_i].right)
 
-      xquarter = self.xspeed / 4
-      yquarter = self.yspeed / 4
-
-      for i in range(1, 4):
-
-        self.box.move_ip(xquarter * i, yquarter * i)
-        colliding_i = self.box.collidelist(terrain.rects)
-        if colliding_i != -1:
-
-          if abs(self.box.bottom - terrain.rects[colliding_i].top) < 5:
-            self.yspeed = 0
-            self.box.bottom = terrain.rects[colliding_i].top + 1
-            return True
-          if abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
-            self.yspeed = 0
-            self.box.top = terrain.rects[colliding_i].bottom
-            return False
-          if abs(self.box.right - terrain.rects[colliding_i].left) < 5:
-            self.xspeed = 0
-            self.box.right = terrain.rects[colliding_i].left
-            return False
-          if abs(self.box.left - terrain.rects[colliding_i].right) < 5:
-            self.xspeed = 0
-            self.box.left = terrain.rects[colliding_i].right
-            return False
-          
-          self.box.x, self.box.y = currentx, currenty
-    else:
-      if abs(self.box.bottom - terrain.rects[colliding_i].top) < 5:
-        self.yspeed = 0
-        self.box.bottom = terrain.rects[colliding_i].top + 1
-        return True
-      if abs(self.box.top - terrain.rects[colliding_i].bottom) < 5:
-        self.yspeed = 0
-        self.box.top = terrain.rects[colliding_i].bottom
-        return False
-      if abs(self.box.right - terrain.rects[colliding_i].left) < 5:
-        self.xspeed = 0
+      if rightDiff < leftDiff:
         self.box.right = terrain.rects[colliding_i].left
-        return False
-      if abs(self.box.left - terrain.rects[colliding_i].right) < 5:
-        self.xspeed = 0
+      else:
         self.box.left = terrain.rects[colliding_i].right
-        return False
+
+  def vCollision(self):
+    colliding_i = self.box.collidelist(terrain.rects)
+
+    if colliding_i != -1:
+      self.yspeed = 0
+
+      botDiff = abs(self.box.bottom - terrain.rects[colliding_i].top)
+      topDiff = abs(self.box.top - terrain.rects[colliding_i].bottom)
+
+      if botDiff < topDiff:
+        self.box.bottom = terrain.rects[colliding_i].top
+        self.grounded = True
+      else:
+        self.box.top = terrain.rects[colliding_i].bottom
+    else:
+      self.yspeed += self.gravity
+      self.grounded = False
+
+  def movement(self):
+    self.box.x += self.xspeed
+    self.hCollision()
+
+    self.box.y += self.yspeed
+    self.vCollision()
 
 
 class Terrain:
