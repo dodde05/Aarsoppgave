@@ -36,12 +36,9 @@ class Player:
     self.xspeed = 0
     self.xmax = 4
     self.movementSpeed = .5
-    self.movementSpeed = .5
 
     self.yspeed = 0
     self.ymax = 10
-    self.gravity = .5
-    self.grounded = False
     self.gravity = .5
     self.grounded = False
 
