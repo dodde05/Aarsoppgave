@@ -51,11 +51,22 @@ class Player:
 			self.reset()
 
 		# Horizontal speed control
-		# if not((keys[pygame.K_a] or keys[pygame.K_LEFT]) and (keys[pygame.K_d] or keys[pygame.K_RIGHT])):
-		if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-			self.xspeed -= self.acceleration
-		if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-			self.xspeed += self.acceleration
+		left = keys[pygame.K_a] or keys[pygame.K_LEFT]
+		right = keys[pygame.K_d] or keys[pygame.K_RIGHT]
+
+		if left and right:
+			self.xspeed = 0
+		else:
+
+			if left:
+				if self.xspeed > 0:
+					self.xspeed = 0
+				self.xspeed -= self.acceleration
+
+			if right:
+				if self.xspeed < 0:
+					self.xspeed = 0
+				self.xspeed += self.acceleration
 
 		if not keys[pygame.K_a] and not keys[pygame.K_d]:
 			if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
