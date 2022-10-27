@@ -68,9 +68,8 @@ class Player:
 					self.xspeed = 0
 				self.xspeed += self.acceleration
 
-		if not keys[pygame.K_a] and not keys[pygame.K_d]:
-			if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
-				self.xspeed = 0
+		if not left and not right:
+			self.xspeed = 0
 
 		if self.xspeed > self.xmax:
 			self.xspeed = self.xmax
