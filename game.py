@@ -12,7 +12,7 @@ class Game:
 
 	def run(self):
 		while True:
-
+			print(player.grounded)
 			player.input()
 			player.movement()
 
@@ -30,12 +30,11 @@ class Player:
 		self.box = pygame.Rect(100, 50, 20, 20)
 
 		self.xspeed = 0
-		self.xmax = 4
-		self.movementSpeed = .5
+		self.xmax = 6
+		self.acceleration = 1
 
 		self.yspeed = 0
-		self.ymax = 10
-		self.gravity = .5
+		self.gravity = 1
 		self.grounded = False
 
 	def reset(self):
@@ -52,13 +51,11 @@ class Player:
 			self.reset()
 
 		# Horizontal speed control
-		if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and (keys[pygame.K_d] or keys[pygame.K_RIGHT]):
-			pass
-		else:
-			if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-				self.xspeed -= self.movementSpeed
-			if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-				self.xspeed += self.movementSpeed
+		# if not((keys[pygame.K_a] or keys[pygame.K_LEFT]) and (keys[pygame.K_d] or keys[pygame.K_RIGHT])):
+		if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+			self.xspeed -= self.acceleration
+		if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+			self.xspeed += self.acceleration
 
 		if not keys[pygame.K_a] and not keys[pygame.K_d]:
 			if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
@@ -72,7 +69,7 @@ class Player:
 		# Jumping
 		if keys[pygame.K_SPACE]:
 			if self.grounded:
-				self.yspeed -= 10
+				self.yspeed -= 15
     
 		# Event inputs
 		for event in pygame.event.get():
