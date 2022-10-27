@@ -38,18 +38,27 @@ class Player:
 		self.gravity = .5
 		self.grounded = False
 
+	def reset(self):
+		self.box.x, self.box.y = 100, 50
+
+		self.xspeed = 0
+		self.yspeed = 0
+
 	def input(self):
 		keys = pygame.key.get_pressed()
 
 		# Restart
 		if keys[pygame.K_r]:
-			self.__init__()
+			self.reset()
 
 		# Horizontal speed control
-		if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-			self.xspeed -= self.movementSpeed
-		if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-			self.xspeed += self.movementSpeed
+		if (keys[pygame.K_a] or keys[pygame.K_LEFT]) and (keys[pygame.K_d] or keys[pygame.K_RIGHT]):
+			pass
+		else:
+			if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+				self.xspeed -= self.movementSpeed
+			if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+				self.xspeed += self.movementSpeed
 
 		if not keys[pygame.K_a] and not keys[pygame.K_d]:
 			if not keys[pygame.K_LEFT] and not keys[pygame.K_RIGHT]:
@@ -88,8 +97,10 @@ class Player:
 
 			if rightDiff < leftDiff:
 				self.box.right = terrain.rects[colliding_i].left
+				return True
 			else:
 				self.box.left = terrain.rects[colliding_i].right
+				return True
 
 	def vCollision(self):
 		colliding_i = self.box.collidelist(terrain.rects)
@@ -111,7 +122,8 @@ class Player:
 
 	def movement(self):
 		self.box.x += self.xspeed
-		self.hCollision()
+		if self.hCollision():
+			pass
 
 		self.box.y += self.yspeed
 		self.vCollision()
