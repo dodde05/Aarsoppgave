@@ -6,7 +6,6 @@ import map
 
 class Game:
 	def __init__(self):
-    
 		pygame.init()
 		self.screen = pygame.display.set_mode((800, 450))
 		self.clock = pygame.time.Clock()
@@ -19,7 +18,7 @@ class Game:
 
 			self.screen.fill("black")
 
-			terrain.create_level()
+			terrain.drawLevel()
 			pygame.draw.rect(self.screen, "yellow", player.box)
 
 			pygame.display.update()
@@ -67,17 +66,18 @@ class Player:
 				self.yspeed -= 10
     
 		# Event inputs
-			for event in pygame.event.get():
+		for event in pygame.event.get():
 
-				if event.type == pygame.KEYDOWN:
-					pass
-        
-				if event.type == pygame.KEYUP:
-					pass
-
-				if event.type == pygame.QUIT:
+			if event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_ESCAPE:
 					pygame.quit()
 					exit()
+        
+			if event.type == pygame.KEYUP: ...
+
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				exit()
 
 	def hCollision(self):
 		colliding_i = self.box.collidelist(terrain.rects)
@@ -86,10 +86,10 @@ class Player:
 			rightDiff = abs(self.box.right - terrain.rects[colliding_i].left)
 			leftDiff = abs(self.box.left - terrain.rects[colliding_i].right)
 
-		if rightDiff < leftDiff:
-			self.box.right = terrain.rects[colliding_i].left
-		else:
-			self.box.left = terrain.rects[colliding_i].right
+			if rightDiff < leftDiff:
+				self.box.right = terrain.rects[colliding_i].left
+			else:
+				self.box.left = terrain.rects[colliding_i].right
 
 	def vCollision(self):
 		colliding_i = self.box.collidelist(terrain.rects)
@@ -126,7 +126,7 @@ class Terrain:
 				if col == "o":
 					self.rects.append(pygame.Rect(col_i * map.TILESIZE - map.TILESIZE, row_i * map.TILESIZE - map.TILESIZE, map.TILESIZE, map.TILESIZE))
 
-	def create_level(self):
+	def drawLevel(self):
 		for i, rect in enumerate(self.rects):
 			pygame.draw.rect(game.screen, "red", self.rects[i])
 
