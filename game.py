@@ -12,7 +12,7 @@ class Game:
 
 	def run(self):
 		while True:
-			print(player.grounded)
+
 			player.input()
 			player.movement()
 
@@ -33,8 +33,13 @@ class Player:
 		self.xmax = 6
 		self.acceleration = 1
 
+		self.leftWall = False
+		self.rightWall = False
+
+
 		self.yspeed = 0
 		self.gravity = 1
+
 		self.grounded = False
 
 	def reset(self):
@@ -51,21 +56,20 @@ class Player:
 			self.reset()
 
 		# Horizontal speed control
-		left = keys[pygame.K_a] or keys[pygame.K_LEFT]
-		right = keys[pygame.K_d] or keys[pygame.K_RIGHT]
+		self.leftInput = keys[pygame.K_a] or keys[pygame.K_LEFT]
+		self.rightInput = keys[pygame.K_d] or keys[pygame.K_RIGHT]
 
-		if (left and right) or (not left and not right):
-			self.xspeed = 0
+		if (self.leftInput and self.rightInput) or (not self.leftInput and not self.rightInput):
+			if self.xspeed > 0:
+				self.xspeed -= self.acceleration
+			elif self.xspeed < 0:
+				self.xspeed += self.acceleration
 		else:
 
-			if left:
-				if self.xspeed > 0:
-					self.xspeed = 0
+			if self.leftInput:
 				self.xspeed -= self.acceleration
 
-			if right:
-				if self.xspeed < 0:
-					self.xspeed = 0
+			if self.rightInput:
 				self.xspeed += self.acceleration
 
 		if self.xspeed > self.xmax:
@@ -73,11 +77,19 @@ class Player:
 		elif self.xspeed < -self.xmax:
 			self.xspeed = -self.xmax
 
-		# Jumping
-		if keys[pygame.K_SPACE]:
-			if self.grounded:
-				self.yspeed -= 15
-    
+		# (Wall)Jumping
+		if keys[pygame.K_SPACE] and self.grounded:
+			self.yspeed = -15
+
+		elif (self.leftWall or self.rightWall) and self.yspeed > 0:
+			self.yspeed = 5
+			if keys[pygame.K_SPACE]:
+				self.yspeed = -15
+				if self.leftWall:
+					self.xspeed = self.xmax
+				else:
+					self.xspeed = -self.xmax
+
 		# Event inputs
 		for event in pygame.event.get():
 
@@ -101,16 +113,19 @@ class Player:
 
 			if rightDiff < leftDiff:
 				self.box.right = terrain.rects[colliding_i].left
-				return True
+				self.rightWall = True
 			else:
 				self.box.left = terrain.rects[colliding_i].right
-				return True
+				self.leftWall = True
+
+		else:
+			self.leftWall = self.rightWall = False
 
 	def vCollision(self):
 		colliding_i = self.box.collidelist(terrain.rects)
 
 		if colliding_i != -1:
-			self.yspeed = 0
+			self.yspeed = 1
 
 			botDiff = abs(self.box.bottom - terrain.rects[colliding_i].top)
 			topDiff = abs(self.box.top - terrain.rects[colliding_i].bottom)
@@ -126,8 +141,7 @@ class Player:
 
 	def movement(self):
 		self.box.x += self.xspeed
-		if self.hCollision():
-			pass
+		self.hCollision()
 
 		self.box.y += self.yspeed
 		self.vCollision()
