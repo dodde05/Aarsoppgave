@@ -12,7 +12,7 @@ class Game:
 
 	def run(self):
 		while True:
-
+			print(player.yspeed)
 			player.input()
 			player.movement()
 
@@ -27,7 +27,7 @@ class Game:
 
 class Player:
 	def __init__(self):
-		self.box = pygame.Rect(100, 50, 20, 20)
+		self.box = pygame.Rect(15, 0, 20, 20)
 
 		self.xspeed = 0
 		self.xmax = 6
@@ -38,6 +38,7 @@ class Player:
 
 
 		self.yspeed = 0
+		self.ymax = 20
 		self.gravity = 1
 
 		self.grounded = False
@@ -76,6 +77,10 @@ class Player:
 			self.xspeed = self.xmax
 		elif self.xspeed < -self.xmax:
 			self.xspeed = -self.xmax
+
+		# Vertical speed cap
+		if self.yspeed > self.ymax:
+			self.yspeed = self.ymax
 
 		# (Wall)Jumping
 		if keys[pygame.K_SPACE] and self.grounded:
