@@ -12,7 +12,7 @@ class Game:
 
 	def run(self):
 		while True:
-			print(player.yspeed)
+			print([player.grounded, player.platformed, player.yspeed])
 			player.input()
 			player.movement()
 
@@ -38,10 +38,10 @@ class Player:
 
 
 		self.yspeed = 0
-		self.ymax = 20
 		self.gravity = 1
 
 		self.grounded = False
+		self.platformed = False
 
 	def reset(self):
 		self.box.x, self.box.y = 100, 50
@@ -78,12 +78,8 @@ class Player:
 		elif self.xspeed < -self.xmax:
 			self.xspeed = -self.xmax
 
-		# Vertical speed cap
-		if self.yspeed > self.ymax:
-			self.yspeed = self.ymax
-
 		# (Wall)Jumping
-		if keys[pygame.K_SPACE] and self.grounded:
+		if keys[pygame.K_SPACE] and (self.grounded or self.platformed):
 			self.yspeed = -15
 
 		elif (self.leftWall or self.rightWall) and self.yspeed > 0:
@@ -110,39 +106,52 @@ class Player:
 				exit()
 
 	def hCollision(self):
-		colliding_i = self.box.collidelist(terrain.rects)
+		colliding_i = self.box.collidelist(terrain.ground)
 
 		if colliding_i != -1:
-			rightDiff = abs(self.box.right - terrain.rects[colliding_i].left)
-			leftDiff = abs(self.box.left - terrain.rects[colliding_i].right)
 
-			if rightDiff < leftDiff:
-				self.box.right = terrain.rects[colliding_i].left
+			if self.xspeed > 0:
+				self.box.right = terrain.ground[colliding_i].left
 				self.rightWall = True
 			else:
-				self.box.left = terrain.rects[colliding_i].right
+				self.box.left = terrain.ground[colliding_i].right
 				self.leftWall = True
 
 		else:
 			self.leftWall = self.rightWall = False
 
 	def vCollision(self):
-		colliding_i = self.box.collidelist(terrain.rects)
+		colliding_i = self.box.collidelist(terrain.ground)
 
 		if colliding_i != -1:
-			self.yspeed = 1
 
-			botDiff = abs(self.box.bottom - terrain.rects[colliding_i].top)
-			topDiff = abs(self.box.top - terrain.rects[colliding_i].bottom)
-
-			if botDiff < topDiff:
-				self.box.bottom = terrain.rects[colliding_i].top
+			if self.yspeed > 0:
+				self.box.bottom = terrain.ground[colliding_i].top
 				self.grounded = True
 			else:
-				self.box.top = terrain.rects[colliding_i].bottom
+				self.box.top = terrain.ground[colliding_i].bottom
+				self.grounded = False
+
+			self.yspeed = 1
+		
+		else:
+			self.pCollision()
+
+	def pCollision(self):
+		colliding_i = self.box.collidelist(terrain.platforms)
+
+		if colliding_i != -1:
+
+			if self.yspeed >= 0:
+				self.box.bottom = terrain.platforms[colliding_i].top
+				self.platformed = True
+
+				self.yspeed = 1
+
 		else:
 			self.yspeed += self.gravity
 			self.grounded = False
+			self.platformed = False
 
 	def movement(self):
 		self.box.x += self.xspeed
@@ -154,16 +163,24 @@ class Player:
 
 class Terrain:
 	def __init__(self):
-		self.rects = []
+		tilesize = map.TILESIZE
+
+		self.ground = []
+		self.platforms = []
 
 		for row_i, row in enumerate(map.map_layout):
 			for col_i, col in enumerate(row):
 				if col == "o":
-					self.rects.append(pygame.Rect(col_i * map.TILESIZE - map.TILESIZE, row_i * map.TILESIZE - map.TILESIZE, map.TILESIZE, map.TILESIZE))
+					self.ground.append(pygame.Rect(col_i * tilesize - tilesize, row_i * tilesize - tilesize, tilesize, tilesize))
+				elif col == "x":
+					self.platforms.append(pygame.Rect(col_i * tilesize - tilesize, row_i * tilesize - tilesize, tilesize, 10))
 
 	def drawLevel(self):
-		for i, rect in enumerate(self.rects):
-			pygame.draw.rect(game.screen, "red", self.rects[i])
+		for i, rect in enumerate(self.ground):
+			pygame.draw.rect(game.screen, "red", self.ground[i])
+		for i, rect in enumerate(self.platforms):
+			pygame.draw.rect(game.screen, "coral4", self.platforms[i])
+
 
 if __name__ == "__main__":
 	game = Game()
