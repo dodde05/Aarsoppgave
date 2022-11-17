@@ -1,22 +1,27 @@
 import pygame
 from sys import exit
 
+import cannon
 import map
 
 
 class Game:
 	def __init__(self):
 		pygame.init()
-		self.screen = pygame.display.set_mode((800, 450))
+
+		self.SCREENSIZE = 50
+		SCREENRATIO = [16, 9]
+
+		self.screen = pygame.display.set_mode((SCREENRATIO[0] * self.SCREENSIZE, SCREENRATIO[1] * self.SCREENSIZE))
 		self.clock = pygame.time.Clock()
 
 	def run(self):
 		while True:
-			print([player.grounded, player.platformed, player.yspeed])
+
 			player.input()
 			player.movement()
 
-			self.screen.fill("black")
+			self.screen.fill("deepskyblue")
 
 			terrain.drawLevel()
 			pygame.draw.rect(self.screen, "yellow", player.box)
@@ -163,7 +168,7 @@ class Player:
 
 class Terrain:
 	def __init__(self):
-		tilesize = map.TILESIZE
+		tilesize = game.SCREENSIZE / 2
 
 		self.ground = []
 		self.platforms = []
@@ -177,7 +182,7 @@ class Terrain:
 
 	def drawLevel(self):
 		for i, rect in enumerate(self.ground):
-			pygame.draw.rect(game.screen, "red", self.ground[i])
+			pygame.draw.rect(game.screen, "darkgreen", self.ground[i])
 		for i, rect in enumerate(self.platforms):
 			pygame.draw.rect(game.screen, "coral4", self.platforms[i])
 
