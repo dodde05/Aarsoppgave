@@ -1,5 +1,6 @@
 import pygame
 from sys import exit
+import random
 
 import map
 
@@ -21,6 +22,7 @@ class Game:
 
             player.input()
             player.movement()
+            cannonball.launch()
 
             self.screen.fill("deepskyblue")
 
@@ -167,7 +169,7 @@ class Player:
         self.vCollision()
 
 
-class Cannon:
+class Cannonball:
     def __init__(self):
         self.positions = {"left": [], "right": []}
 
@@ -175,6 +177,15 @@ class Cannon:
             self.positions["left"].append([-terrain.tilesize, terrain.tilesize * tile])
         for i in range(map.grid["y"]):
             self.positions["right"].append([game.resolution[0], terrain.tilesize * tile])
+    
+    def launch(self):
+        side = random.randint(0, 1)
+        cannon = random.randint(0, 17)
+
+        if side == 0:
+            print(self.positions["left"][cannon])
+        else:
+            print(self.positions["right"][cannon])
 
 
 class Terrain:
@@ -202,6 +213,6 @@ if __name__ == "__main__":
     game = Game()
     player = Player()
     terrain = Terrain()
-    cannon = Cannon()
+    cannonball = Cannonball()
 
     game.run()
