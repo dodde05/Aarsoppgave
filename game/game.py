@@ -5,7 +5,6 @@ import map
 
 
 class Game:
-    """stor kuk"""
     def __init__(self):
         pygame.init()
 
@@ -34,7 +33,6 @@ class Game:
 
 class Player:
     def __init__(self):
-        """Jeg og Jon ser på barnepornografi og vi vil begge kuuuuummm. God Jul"""
         self.box = pygame.Rect(15, 0, 20, 20)
 
         self.xspeed = 0
@@ -173,12 +171,10 @@ class Cannon:
     def __init__(self):
         self.positions = {"left": [], "right": []}
 
-        for i in range(map.grid[1]):
-            self.positions["left"].append([-map.tilesize, terrain.tilesize * i])
-        for i in range(map.grid[1]):
-            self.positions["right"].append([game.resolution[0], terrain.tilesize * i])
-        
-        print(self.positions)
+        for tile in range(map.grid["y"]):
+            self.positions["left"].append([-terrain.tilesize, terrain.tilesize * tile])
+        for i in range(map.grid["y"]):
+            self.positions["right"].append([game.resolution[0], terrain.tilesize * tile])
 
 
 class Terrain:
@@ -188,13 +184,12 @@ class Terrain:
         self.ground = []
         self.platforms = []
 
-        for row_i, row in enumerate(map.layout):
+        for row_i, row in enumerate(map.LAYOUT):
             for col_i, col in enumerate(row):
-                if col == "o":
+                if col == "o" or col == "0":
                     self.ground.append(pygame.Rect(col_i * self.tilesize - self.tilesize, row_i * self.tilesize - self.tilesize, self.tilesize, self.tilesize))
                 elif col == "x":
-                    self.platforms.append(pygame.Rect(
-                        col_i * self.tilesize - self.tilesize, row_i * self.tilesize - self.tilesize, self.tilesize, 10))
+                    self.platforms.append(pygame.Rect(col_i * self.tilesize - self.tilesize, row_i * self.tilesize - self.tilesize, self.tilesize, 10))
 
     def drawLevel(self):
         for i, rect in enumerate(self.ground):
@@ -207,5 +202,6 @@ if __name__ == "__main__":
     game = Game()
     player = Player()
     terrain = Terrain()
+    cannon = Cannon()
 
     game.run()

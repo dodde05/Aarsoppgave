@@ -1,13 +1,13 @@
 import mysql.connector as mariadb
 
 conn = mariadb.connect(
-    host="10.2.1.132",
+    host="10.2.2.153",
     user="client",
     password="79E76w864dcKbja",
     database="highscores"
     )
 
-navn = input("Oppgi dine initialer (3 bokstaver): ")
+navn = input("Oppgi ditt kallenavn: ")
 highscore = input("Din highscore ble: ")
 
 cursor = conn.cursor()

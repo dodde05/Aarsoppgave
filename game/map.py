@@ -1,27 +1,28 @@
 # o = ground
+# 0 = ground outside window
 # x = platforms
 
-grid = (32, 18)
+grid = {"x": 32, "y": 18}
 
 LAYOUT = [
-"oooooooooooooooooooooooooooooooooo", #outside window
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o               oo               o",
-"o     xxxxx     oo     xxxxx     o",
-"o               oo               o",
-"o                                o",
-"o                                o",
-"o                                o",
-"o           xxxxxxxxxx           o",
-"ooo                            ooo",
-"oooo                          oooo",
-"oooooooooooooooooooooooooooooooooo",
-"" #outside window
+"0000000000000000000000000000000000",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0               oo               0",
+"0     xxxxx     oo     xxxxx     0",
+"0               oo               0",
+"0                                0",
+"0                                0",
+"0                                0",
+"0           xxxxxxxxxx           0",
+"0oo                            oo0",
+"0ooo                          ooo0",
+"0oooooooooooooooooooooooooooooooo0",
+""
 ]

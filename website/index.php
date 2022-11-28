@@ -19,7 +19,7 @@
     </tr>
     <?php
 
-        $host = "10.2.1.132";
+        $host = "10.2.2.153";
         $user = "client";
         $password = "79E76w864dcKbja";
         $database = "highscores";
