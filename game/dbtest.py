@@ -1,22 +1,20 @@
-import mysql.connector
+import mysql.connector as mariadb
 
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="dodde",
-    password="BigMan!123",
+conn = mariadb.connect(
+    host="10.2.1.132",
+    user="client",
+    password="79E76w864dcKbja",
     database="highscores"
-)
+    )
 
 navn = input("Oppgi dine initialer (3 bokstaver): ")
 highscore = input("Din highscore ble: ")
-dato = input("Dato (ÅÅÅÅ-MM-DD): ")
 
-mycursor = mydb.cursor(navn, highscore, dato)
+cursor = conn.cursor()
 
-sql = "INSERT INTO attempt (initialer, score, dato) VALUES (%s, %s, %s)"
-val = (navn, highscore, dato)
-mycursor.execute(sql, val)
+query = f"INSERT INTO attempt (navn, score, dato) VALUES ('{navn}', {highscore}, CURDATE())"
+cursor.execute(query)
 
-mydb.commit()
+conn.commit()
 
-print(mycursor.rowcount, "record inserted.")
+print(cursor.rowcount, "record inserted")

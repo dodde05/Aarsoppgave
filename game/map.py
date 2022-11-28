@@ -1,8 +1,9 @@
 # o = ground
 # x = platforms
 
-# 32*18 25(800*450)
-map_layout = [
+grid = (32, 18)
+
+LAYOUT = [
 "oooooooooooooooooooooooooooooooooo", #outside window
 "o               oo               o",
 "o               oo               o",
