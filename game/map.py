@@ -20,8 +20,8 @@ LAYOUT = [
 "0                                0",
 "0                                0",
 "0                                0",
-"0           xxxxxxxxxx           0",
-"0oo                            oo0",
+"0ooo        xxxxxxxxxx        ooo0",
+"0ooo                          ooo0",
 "0ooo                          ooo0",
 "0oooooooooooooooooooooooooooooooo0",
 ""

@@ -9,29 +9,33 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        self.SCREENSIZE = 50
+        self.active = True
+
+        self.SIZEFACTOR = 50
         SCREENRATIO = [16, 9]
 
-        self.resolution = [SCREENRATIO[0] * self.SCREENSIZE, SCREENRATIO[1] * self.SCREENSIZE]
+        self.resolution = {"x": SCREENRATIO[0] * self.SIZEFACTOR, "y": SCREENRATIO[1] * self.SIZEFACTOR}
         
-        self.screen = pygame.display.set_mode(self.resolution)
+        self.screen = pygame.display.set_mode((self.resolution["x"], self.resolution["y"]))
         self.clock = pygame.time.Clock()
 
     def run(self):
-        while True:
+        while self.active:
 
             player.input()
             player.movement()
 
             cannon.selection()
 
+
             self.screen.fill("deepskyblue")
 
             terrain.drawLevel()
-            pygame.draw.rect(self.screen, "yellow", player.box)
+            pygame.draw.rect(self.screen, "yellow", player.rect)
             for ball in cannon.balls:
                 ball.move()
-                pygame.draw.rect(self.screen, "black", ball.rect)
+                pygame.draw.rect(self.screen, "black", ball.rect, 0, 12)
+
 
             pygame.display.update()
             self.clock.tick(60)
@@ -39,7 +43,7 @@ class Game:
 
 class Player:
     def __init__(self):
-        self.box = pygame.Rect(15, 0, 20, 20)
+        self.rect = pygame.Rect(15, 0, 20, 20)
 
         self.xspeed = 0
         self.xmax = 6
@@ -55,7 +59,7 @@ class Player:
         self.platformed = False
 
     def reset(self):
-        self.box.x, self.box.y = 100, 50
+        self.rect.x, self.rect.y = 100, 50
 
         self.xspeed = 0
         self.yspeed = 0
@@ -118,30 +122,30 @@ class Player:
                 exit()
 
     def hCollision(self):
-        colliding_i = self.box.collidelist(terrain.ground)
+        colliding_i = self.rect.collidelist(terrain.ground)
 
         if colliding_i != -1:
 
             if self.xspeed > 0:
-                self.box.right = terrain.ground[colliding_i].left
+                self.rect.right = terrain.ground[colliding_i].left
                 self.rightWall = True
             else:
-                self.box.left = terrain.ground[colliding_i].right
+                self.rect.left = terrain.ground[colliding_i].right
                 self.leftWall = True
 
         else:
             self.leftWall = self.rightWall = False
 
     def vCollision(self):
-        colliding_i = self.box.collidelist(terrain.ground)
+        colliding_i = self.rect.collidelist(terrain.ground)
 
         if colliding_i != -1:
 
             if self.yspeed > 0:
-                self.box.bottom = terrain.ground[colliding_i].top
+                self.rect.bottom = terrain.ground[colliding_i].top
                 self.grounded = True
             else:
-                self.box.top = terrain.ground[colliding_i].bottom
+                self.rect.top = terrain.ground[colliding_i].bottom
                 self.grounded = False
 
             self.yspeed = 1
@@ -150,12 +154,12 @@ class Player:
             self.pCollision()
 
     def pCollision(self):
-        colliding_i = self.box.collidelist(terrain.platforms)
+        colliding_i = self.rect.collidelist(terrain.platforms)
 
         if colliding_i != -1:
 
             if self.yspeed >= 0:
-                self.box.bottom = terrain.platforms[colliding_i].top
+                self.rect.bottom = terrain.platforms[colliding_i].top
                 self.platformed = True
 
                 self.yspeed = 1
@@ -166,10 +170,10 @@ class Player:
             self.platformed = False
 
     def movement(self):
-        self.box.x += self.xspeed
+        self.rect.x += self.xspeed
         self.hCollision()
 
-        self.box.y += self.yspeed
+        self.rect.y += self.yspeed
         self.vCollision()
 
 
@@ -178,14 +182,13 @@ class Cannon:
         self.positions = {"left": [], "right": []}
         self.balls = []
 
-        for tile in range(map.grid["y"]):
+        for tile in range(map.grid["y"] - 1):
             self.positions["left"].append([-terrain.tilesize, terrain.tilesize * tile])
-        for i in range(map.grid["y"]):
-            self.positions["right"].append([game.resolution[0], terrain.tilesize * tile])
+            self.positions["right"].append([game.resolution["x"], terrain.tilesize * tile])
     
     def selection(self):
         side = random.randint(0, 1)
-        cannon = random.randint(0, 17)
+        cannon = random.randint(0, 16)
         chance = random.randint(1, 60)
 
         if chance == 60:
@@ -193,15 +196,14 @@ class Cannon:
                 self.balls.append(Cannonball(self.positions["left"][cannon], len(self.balls)))
             else:
                 self.balls.append(Cannonball(self.positions["right"][cannon], len(self.balls)))
-            print(self.balls)
 
 
 class Cannonball:
     def __init__(self, pos: list[int], index: int):
-        self.rect = pygame.Rect(pos[0], pos[1], 20, 20)
+        self.rect = pygame.Rect(pos[0], pos[1], terrain.tilesize, terrain.tilesize)
         self.index = index
         self.xspeed = 0
-        if pos[0] < game.resolution[0] / 2: # If cannonball postion is to the left of middle of the screen
+        if pos[0] < game.resolution["x"] / 2: # If cannonball postion is to the left of the middle of the screen
             self.xspeed = 6
         else:
             self.xspeed = -6
@@ -209,13 +211,22 @@ class Cannonball:
     def move(self):
         self.rect.move_ip(self.xspeed, 0)
 
-        if self.xspeed > 0 and self.rect.x > game.resolution[0]:
-            del self.balls[self.index]
+        if self.xspeed > 0 and self.rect.x > game.resolution["x"] or self.xspeed < 0 and self.rect.x < -terrain.tilesize:
+            for ball in cannon.balls:
+                if ball.index > self.index:
+                    ball.index -= 1
+            del cannon.balls[self.index]
+        
+        self.hit()
+
+    def hit(self):
+        if self.rect.colliderect(player.rect):
+            game.active = False
 
 
 class Terrain:
     def __init__(self):
-        self.tilesize = game.SCREENSIZE / 2
+        self.tilesize = game.SIZEFACTOR / 2
 
         self.ground = []
         self.platforms = []
@@ -233,11 +244,19 @@ class Terrain:
         for i, rect in enumerate(self.platforms):
             pygame.draw.rect(game.screen, "coral4", self.platforms[i])
 
-
-if __name__ == "__main__":
+def start():
+    global game 
     game = Game()
+
+    global player
     player = Player()
+
+    global terrain
     terrain = Terrain()
+
+    global cannon
     cannon = Cannon()
 
+if __name__ == "__main__":
+    start()
     game.run()
