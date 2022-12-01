@@ -22,12 +22,16 @@ class Game:
 
             player.input()
             player.movement()
-            cannonball.launch()
+
+            cannon.selection()
 
             self.screen.fill("deepskyblue")
 
             terrain.drawLevel()
             pygame.draw.rect(self.screen, "yellow", player.box)
+            for ball in cannon.balls:
+                ball.move()
+                pygame.draw.rect(self.screen, "black", ball.rect)
 
             pygame.display.update()
             self.clock.tick(60)
@@ -169,23 +173,44 @@ class Player:
         self.vCollision()
 
 
-class Cannonball:
+class Cannon:
     def __init__(self):
         self.positions = {"left": [], "right": []}
+        self.balls = []
 
         for tile in range(map.grid["y"]):
             self.positions["left"].append([-terrain.tilesize, terrain.tilesize * tile])
         for i in range(map.grid["y"]):
             self.positions["right"].append([game.resolution[0], terrain.tilesize * tile])
     
-    def launch(self):
+    def selection(self):
         side = random.randint(0, 1)
         cannon = random.randint(0, 17)
+        chance = random.randint(1, 60)
 
-        if side == 0:
-            print(self.positions["left"][cannon])
+        if chance == 60:
+            if side == 0:
+                self.balls.append(Cannonball(self.positions["left"][cannon], len(self.balls)))
+            else:
+                self.balls.append(Cannonball(self.positions["right"][cannon], len(self.balls)))
+            print(self.balls)
+
+
+class Cannonball:
+    def __init__(self, pos: list[int], index: int):
+        self.rect = pygame.Rect(pos[0], pos[1], 20, 20)
+        self.index = index
+        self.xspeed = 0
+        if pos[0] < game.resolution[0] / 2: # If cannonball postion is to the left of middle of the screen
+            self.xspeed = 6
         else:
-            print(self.positions["right"][cannon])
+            self.xspeed = -6
+
+    def move(self):
+        self.rect.move_ip(self.xspeed, 0)
+
+        if self.xspeed > 0 and self.rect.x > game.resolution[0]:
+            del self.balls[self.index]
 
 
 class Terrain:
@@ -213,6 +238,6 @@ if __name__ == "__main__":
     game = Game()
     player = Player()
     terrain = Terrain()
-    cannonball = Cannonball()
+    cannon = Cannon()
 
     game.run()
