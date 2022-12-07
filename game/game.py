@@ -1,6 +1,9 @@
 import pygame
 from sys import exit
 import random
+import time
+import tkinter as tk
+import mysql.connector
 
 import map
 
@@ -11,18 +14,25 @@ class Game:
 
         self.active = True
 
+        self.timer = 0
+        self.difficulty = 0
+
+        self.prompt = False
+
         self.SIZEFACTOR = 50
         SCREENRATIO = [16, 9]
 
-        self.resolution = {"x": SCREENRATIO[0] * self.SIZEFACTOR, "y": SCREENRATIO[1] * self.SIZEFACTOR}
+        self.resolution = {"x": SCREENRATIO[0] * self.SIZEFACTOR, "y": SCREENRATIO[1] * self.SIZEFACTOR} # x: 800, y: 450
         
         self.screen = pygame.display.set_mode((self.resolution["x"], self.resolution["y"]))
         self.clock = pygame.time.Clock()
 
     def run(self):
         while self.active:
+            self.time()
 
-            player.input()
+
+            player.events()
             player.movement()
 
             cannon.selection()
@@ -36,14 +46,70 @@ class Game:
                 ball.move()
                 pygame.draw.rect(self.screen, "black", ball.rect, 0, 12)
 
-
+            pygame.display.set_caption(f"Your score: {round(self.timer, 2)}")
             pygame.display.update()
             self.clock.tick(60)
+        
+        self.end()
+    
+    def time(self):
+        self.timer += 1 / 60
+        self.difficulty += 1 / 60
+
+        if self.difficulty > 10:
+            self.difficulty -= 10
+            if cannon.fireChance > 10:
+                cannon.fireChance -= 2
+
+    def end(self):
+        text = pygame.display
+
+        text.set_caption("YOU DIED")
+        time.sleep(3)
+        text.set_caption(f"Final score: {round(self.timer, 2)}")
+        time.sleep(3)
+
+        text.set_caption("Would you like to upload your score? y/n")
+        while not self.prompt:
+            if player.events():
+                root = tk.Tk()
+                root.title("Score Upload")
+                root.geometry("400x225")
+
+                inputtxt = tk.Text(root, height = 5, width = 40)
+                inputtxt.insert("1.0", "Enter a name")
+                inputtxt.pack()
+
+                def upload():
+                    conn = mysql.connector.connect(
+                        host="10.2.2.4",
+                        user="client",
+                        password="79E76w864dcKbja",
+                        database="highscores"
+                    )
+
+                    cursor = conn.cursor()
+
+                    text = inputtxt.get(1.0, "end-1c")
+                    query = f"INSERT INTO attempt (navn, score, dato) VALUES ('{text}', {self.timer}, CURDATE())"
+                    cursor.execute(query)
+
+                    conn.commit()
+
+                    root.destroy()
+                
+                button = tk.Button(root, text = "Upload", command = upload)
+                button.pack()
+
+                lbl = tk.Label(root, text = "")
+                lbl.pack()
+
+                root.mainloop()
 
 
 class Player:
     def __init__(self):
-        self.rect = pygame.Rect(15, 0, 20, 20)
+        self.rect = pygame.Rect(game.resolution["x"] / 2 - 10, 405, 20, 20)
 
         self.xspeed = 0
         self.xmax = 6
@@ -58,18 +124,8 @@ class Player:
         self.grounded = False
         self.platformed = False
 
-    def reset(self):
-        self.rect.x, self.rect.y = 100, 50
-
-        self.xspeed = 0
-        self.yspeed = 0
-
-    def input(self):
+    def events(self):
         keys = pygame.key.get_pressed()
-
-        # Restart
-        if keys[pygame.K_r]:
-            self.reset()
 
         # Horizontal speed control
         self.leftInput = keys[pygame.K_a] or keys[pygame.K_LEFT]
@@ -105,6 +161,13 @@ class Player:
                     self.xspeed = self.xmax
                 else:
                     self.xspeed = -self.xmax
+
+        # y/n prompts
+        if keys[pygame.K_y]:
+            game.prompt = True
+            return True
+        elif keys[pygame.K_n]:
+            game.prompt = True
 
         # Event inputs
         for event in pygame.event.get():
@@ -182,31 +245,34 @@ class Cannon:
         self.positions = {"left": [], "right": []}
         self.balls = []
 
+        self.fireChance = 60
+
         for tile in range(map.grid["y"] - 1):
             self.positions["left"].append([-terrain.tilesize, terrain.tilesize * tile])
             self.positions["right"].append([game.resolution["x"], terrain.tilesize * tile])
     
     def selection(self):
         side = random.randint(0, 1)
-        cannon = random.randint(0, 16)
-        chance = random.randint(1, 60)
+        height = random.randint(0, 16)
+        chance = random.randint(1, self.fireChance)
+        speed = random.randint(6, 10)
 
-        if chance == 60:
+        if chance == self.fireChance:
             if side == 0:
-                self.balls.append(Cannonball(self.positions["left"][cannon], len(self.balls)))
+                self.balls.append(Cannonball(self.positions["left"][height], len(self.balls), speed))
             else:
-                self.balls.append(Cannonball(self.positions["right"][cannon], len(self.balls)))
+                self.balls.append(Cannonball(self.positions["right"][height], len(self.balls), speed))
 
 
 class Cannonball:
-    def __init__(self, pos: list[int], index: int):
+    def __init__(self, pos: list[int], index: int, speed: int):
         self.rect = pygame.Rect(pos[0], pos[1], terrain.tilesize, terrain.tilesize)
         self.index = index
         self.xspeed = 0
         if pos[0] < game.resolution["x"] / 2: # If cannonball postion is to the left of the middle of the screen
-            self.xspeed = 6
+            self.xspeed = speed
         else:
-            self.xspeed = -6
+            self.xspeed = -speed
 
     def move(self):
         self.rect.move_ip(self.xspeed, 0)
@@ -245,16 +311,11 @@ class Terrain:
             pygame.draw.rect(game.screen, "coral4", self.platforms[i])
 
 def start():
-    global game 
+    global game, player, terrain, cannon
+
     game = Game()
-
-    global player
     player = Player()
-
-    global terrain
     terrain = Terrain()
-
-    global cannon
     cannon = Cannon()
 
 if __name__ == "__main__":
