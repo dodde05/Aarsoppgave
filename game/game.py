@@ -9,6 +9,8 @@ import map
 
 
 class Game:
+    """Main class containing game loop, variables and database upload code"""
+
     def __init__(self):
         pygame.init()
 
@@ -108,6 +110,7 @@ class Game:
 
 
 class Player:
+    """Class containing player rectangle and all its variables, as well as the input function"""
     def __init__(self):
         self.rect = pygame.Rect(game.resolution["x"] / 2 - 10, 405, 20, 20)
 
