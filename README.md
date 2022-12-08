@@ -1,7 +1,7 @@
 # Prosjektbeskrivelse
 Et grafisk plattformspill der poeng kan lastes opp til en database og vises på en nettside.
 
-# Tekniske dataljer
+# Tekniske detaljer
 
 ## Client side
 ### Spillet
