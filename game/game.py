@@ -256,31 +256,26 @@ class Player:
 
 
 class Cannon:
-    """Sets possible starting positions for class Cannonball and randomly selects one"""
+    """Randomly selects a position to the left or to the right of the screen and possibly fires a Cannonball()"""
 
     def __init__(self):
-        self.positions = {"left": [], "right": []}
         self.balls = [] # Stores all active Cannonball objects
 
         self.fireChance = 60 # The lower this variable is, the higher the chance is of a cannon firing every frame. 60 is 1 ball per seocnd on average. 0 is 1 ball per frame
-
-        for tile in range(map.grid["y"] - 1): # Sets and stores all cannon positions
-            self.positions["left"].append([-terrain.tilesize, terrain.tilesize * tile])
-            self.positions["right"].append([game.resolution["x"], terrain.tilesize * tile])
     
     def selection(self):
         """Randomly selects a cannon and possibly makes it fire"""
 
         side = random.randint(0, 1)
-        height = random.randint(0, 16)
+        height = random.randint(0, game.resolution["y"] - terrain.tilesize)
         chance = random.randint(1, self.fireChance)
         speed = random.randint(6, 10)
 
         if chance == self.fireChance:
             if side == 0:
-                self.balls.append(Cannonball(self.positions["left"][height], len(self.balls), speed))
+                self.balls.append(Cannonball([0, height], len(self.balls), speed))
             else:
-                self.balls.append(Cannonball(self.positions["right"][height], len(self.balls), speed))
+                self.balls.append(Cannonball([game.resolution["x"], height], len(self.balls), speed))
     
     def updateBalls(self):
         """Loops through all active Cannonball objects, updates their positions and draws them"""
