@@ -6,7 +6,7 @@ apt update
 # Basic server setup
 name=$1
 
-echo "Oppsett for bruker $name"
+echo "User setup for $name"
 adduser $name
 usermod -aG sudo pygame
 
@@ -27,6 +27,6 @@ ufw allow 3306
 # Installing phpmyadmin
 apt install php-mbstring php-zip php-gd -y
 
-# Kommandoer med brukerinput
+# Commands with user input
 mysql_secure_installation
 apt install phpmyadmin -y
