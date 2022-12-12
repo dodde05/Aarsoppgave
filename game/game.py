@@ -94,7 +94,7 @@ class Game:
                     cursor = conn.cursor()
 
                     text = inputtxt.get(1.0, "end-1c")
-                    query = f"INSERT INTO attempt (navn, score, dato) VALUES ('{text}', {self.timer}, CURDATE())"
+                    query = f"INSERT INTO attempt (name, score, date) VALUES ('{text}', {self.timer}, CURDATE())"
                     cursor.execute(query)
 
                     conn.commit()
